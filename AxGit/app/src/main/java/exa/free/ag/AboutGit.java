@@ -18,7 +18,7 @@ public class AboutGit extends Fragment {
 
         getActivity().setTitle(R.string.about_git);
 
-        View view = inflater.inflate(R.layout.about_busybox, container, false);
+        View view = inflater.inflate(R.layout.about_git, container, false);
 
         button = view.findViewById(R.id.button);
 
