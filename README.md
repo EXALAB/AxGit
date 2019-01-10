@@ -1,7 +1,7 @@
 This is repo for the main application. If you are looking for the component used in this app, please visit [git-static](https://github.com/EXALAB/git-static) and [git-lfs-static](https://github.com/EXALAB/git-static)
 
 # AxGit
-Most complete Git CLI port for Android, including [Git LFS (Large File System)](https://git-lfs.github.com) Support
+Most complete Git CLI client for Android, including [Git LFS (Large File System)](https://git-lfs.github.com) Support
 
 <a href='https://play.google.com/store/apps/details?id=exa.free.ag'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="100"/></a>
 
