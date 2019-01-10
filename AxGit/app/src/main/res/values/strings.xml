@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">AxGit</string>
+    <string name="version">2201</string>
+    <string name="version_string">2.20.1</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="method1">Method 1</string>
+    <string name="method2">Method 2</string>
+    <string name="about">About</string>
+    <string name="others">Others</string>
+    <string name="about_git">About Git</string>
+    <string name="about_git_content">Git is a fast, scalable, distributed revision control system with an unusually rich command set that provides both high-level operations and full access to internals.\n\nGit is an Open Source project covered by the GNU General Public License version 2 (some parts of it are under different licenses, compatible with the GPLv2). It was originally written by Linus Torvalds with help of a group of hackers around the net.\n\n\n\nTo be clear, we EXA LAB are not author of Git, we only compile the binary statically with cross compiler without any modification to source.\n\nYou can find the component, and the source code of this app by clicking the button below, clicking the button will open a url in the browser which will be redirect to your requested content.</string>
+    <string name="press_again_to_exit">Please press again to exit application</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="support">Support</string>
+    <string name="about_content">Git Version : 2.20.1\n\nAxGit is an app designed to bring git access to Android devices.\n\nThanks for using this apps.\n\n\nRegards, EXA Lab</string>
+    <string name="step1">Note: Please scroll down to see all steps if your device screen is small.\n\nMethod 1 is recommended because not only easy to update, also make all terminal accessible to Git. But if method 1 is not working, please try using method 2 instead.\n\nStep 1 : Click on the button to install Git</string>
+    <string name="step2">Step 2 : Copy the command to clipboard : \n\nexport PATH=/data/data/exa.free.ag/files/:$PATH</string>
+    <string name="step3">Launch terminal, paste and enter the command and you can run Git command. You must paste and enter the command every time you restart the terminal.</string>
+    <string name="m2_step1">Note: Please scroll down to see all steps if your device screen is small.\n\nStep 1 : Please choose a Terminal Emulator App.</string>
+    <string name="m2_step3">Launch terminal, paste and enter the command to install Git. You can then run Git with ./git command, you could also run ls to see all available git command.\n\nIMPORTANT: You must paste and enter the command IN STEP 4 next time after you restart the terminal.</string>
+    <string name="installing">Installing</string>
+    <string name="updating">Updating</string>
+    <string name="reinstalling">Reinstalling</string>
+    <string name="settings">Settings</string>
+</resources>
