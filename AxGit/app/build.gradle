@@ -6,8 +6,8 @@ android {
         applicationId "exa.free.ag"
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 101
-        versionName "1.01"
+        versionCode 110
+        versionName "1.10"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

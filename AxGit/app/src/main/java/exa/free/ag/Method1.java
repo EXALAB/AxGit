@@ -311,7 +311,6 @@ public class Method1 extends Fragment {
                 Toast.makeText(context, "Download Completed !", Toast.LENGTH_SHORT).show();
                 editor.putInt("Version", Integer.valueOf(getString(R.string.version)));
                 editor.apply();
-                new Extract(context).execute();
                 if(button.getText().toString().equalsIgnoreCase("INSTALL")){
                     button.setText("REINSTALL");
                     notifyUserForInstall();
@@ -321,6 +320,7 @@ public class Method1 extends Fragment {
                 }else if(button.getText().toString().equalsIgnoreCase("REINSTALL")){
                     notifyUserForReinstall();
                 }
+                new Extract(context).execute();
             }
         }
     }

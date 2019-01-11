@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,12 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +48,7 @@ public class Method2 extends Fragment implements AppSelector {
     Context context;
     List<ApplicationAdapterListItem> applicationAdapterListItems;
     TerminalChooserAdapter terminalChooserAdapter;
+    DownloadTask downloadTask;
     SharedPreferences sharedPreferences;
     ListView listView;
     AlertDialog.Builder alertDialog;
@@ -49,8 +57,10 @@ public class Method2 extends Fragment implements AppSelector {
     Button button2;
     Button button3;
     Button button4;
-    TextView textView2;
-    TextView textView4;
+    Button button5;
+    TextView textView3;
+    TextView textView5;
+    ProgressDialog mProgressDialog;
     InterstitialAd mInterstitialAd;
     String s;
     String s2;
@@ -68,8 +78,15 @@ public class Method2 extends Fragment implements AppSelector {
         button2 = view.findViewById(R.id.button2);
         button3 = view.findViewById(R.id.button3);
         button4 = view.findViewById(R.id.button4);
-        textView2 = view.findViewById(R.id.textView2);
-        textView4 = view.findViewById(R.id.textView4);
+        button5 = view.findViewById(R.id.button5);
+        textView3 = view.findViewById(R.id.textView3);
+        textView5 = view.findViewById(R.id.textView5);
+
+        mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setMessage("Connecting...");
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setCancelable(false);
 
         mInterstitialAd = new InterstitialAd(context);
         mInterstitialAd.setAdUnitId("ca-app-pub-5748356089815497/2595876004");
@@ -82,39 +99,60 @@ public class Method2 extends Fragment implements AppSelector {
         }
 
         if(s.equals("None")){
-            textView2.setText("Step 2 : Please Choose a Terminal Emulator App first");
-            textView4.setText("Step 4 : Please Choose a Terminal Emulator App first");
-            button2.setEnabled(false);
-            button4.setEnabled(false);
+            textView3.setText("Step 3 : Please Choose a Terminal Emulator App first");
+            textView5.setText("Step 5 : Please Choose a Terminal Emulator App first");
+            button3.setEnabled(false);
+            button5.setEnabled(false);
         }else{
             if(s2.equals("arm64-v8a")){
-                textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm64/git_arm64_gzip && mv git_arm64_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-                textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data" + s);
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data" + s);
             }else if (s2.contains("arm")){
-                textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm/git_arm_gzip && mv git_arm_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-                textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("x86")){
-                textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/i386/git_i386_gzip && mv git_i386_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-                textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("x86_64")){
-                textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/amd64/git_amd64_gzip && mv git_amd64_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-                textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("mips")){
-                textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mipsel/git_mipsel_gzip && mv git_mipsel_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-                textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("mips64")){
-                textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mips64el/git_mips64el_gzip && mv git_mips64el_gzip git.tar.gz &&& tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-                textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }
         }
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAppsDialog();
+                downloadTask = new DownloadTask(context);
+                if(s2.equals("arm64-v8a")){
+                    downloadTask.execute("https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm64/git_arm64_zip");
+                }else if (s2.contains("arm")){
+                    downloadTask.execute("https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm/git_arm_zip");
+                }else if(s2.equals("x86")){
+                    downloadTask.execute("https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/i386/git_i386_zip");
+                }else if(s2.equals("x86_64")){
+                    downloadTask.execute("https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/amd64/git_amd64_zip");
+                }else if(s2.equals("mips")){
+                    downloadTask.execute("https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mipsel/git_mipsel_zip");
+                }else if(s2.equals("mips64")){
+                    downloadTask.execute("https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mips64el/git_mips64el_zip");
+                }else{
+                    Toast.makeText(context, "Sorry, your device is not supported !", Toast.LENGTH_LONG).show();
+                }
             }
         });
         button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAppsDialog();
+            }
+        });
+        button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ClipboardManager clipboard = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -122,28 +160,28 @@ public class Method2 extends Fragment implements AppSelector {
                     mInterstitialAd.show();
                 }else{
                     if(s2.equals("arm64-v8a")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm64/git_arm64_gzip && mv git_arm64_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if (s2.contains("arm")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm/git_arm_gzip && mv git_arm_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("x86")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/i386/git_i386_gzip && mv git_i386_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("x86_64")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/amd64/git_amd64_gzip && mv git_amd64_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("mips")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mipsel/git_mipsel_gzip && mv git_mipsel_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("mips64")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mips64el/git_mips64el_gzip && mv git_mips64el_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }
                 }
             }
         });
-        button3.setOnClickListener(new View.OnClickListener() {
+        button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 s = sharedPreferences.getString("ChoosenTerminal", "None");
@@ -155,7 +193,7 @@ public class Method2 extends Fragment implements AppSelector {
                 }
             }
         });
-        button4.setOnClickListener(new View.OnClickListener() {
+        button5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ClipboardManager clipboard = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -197,26 +235,26 @@ public class Method2 extends Fragment implements AppSelector {
         editor.apply();
         s = sharedPreferences.getString("ChoosenTerminal", "None");
         if(s2.equals("arm64-v8a")){
-            textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm64/git_arm64_gzip && mv git_arm64_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-            textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data" + s);
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data" + s);
         }else if (s2.contains("arm")){
-            textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/arm/git_arm_gzip && mv git_arm_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-            textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("x86")){
-            textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/i386/git_i386_gzip && mv git_i386_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-            textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("x86_64")){
-            textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/amd64/git_amd64_gzip && mv git_amd64_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-            textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("mips")){
-            textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mipsel/git_mipsel_gzip && mv git_mipsel_gzip git.tar.gz && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-            textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("mips64")){
-            textView2.setText("Step 2 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && wget https://raw.githubusercontent.com/EXALAB/AxGit/master/Archive/mips64el/git_mips64el_gzip && mv git_mips64el_gzip git.tar.gz &&& tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
-            textView4.setText("Step 4 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }
-        button2.setEnabled(true);
-        button4.setEnabled(true);
+        button3.setEnabled(true);
+        button5.setEnabled(true);
         alert.dismiss();
     }
     @Override
@@ -237,6 +275,106 @@ public class Method2 extends Fragment implements AppSelector {
         alert.setView(view);
         alert.show();
         new InitializeApps().execute();
+    }
+    private class DownloadTask extends AsyncTask<String, Integer, String> {
+
+        private Context context;
+        private PowerManager.WakeLock mWakeLock;
+
+        public DownloadTask(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // take CPU lock to prevent CPU from going off if the user
+            // presses the power button during download
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    getClass().getName());
+            mWakeLock.acquire();
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            super.onProgressUpdate(progress);
+            // if we get here, length is known, now set indeterminate to false
+            mProgressDialog.setMessage("Downloading...");
+            mProgressDialog.setIndeterminate(false);
+            mProgressDialog.setMax(100);
+            mProgressDialog.setProgress(progress[0]);
+        }
+
+        @Override
+        protected String doInBackground(String... sUrl) {
+            InputStream input = null;
+            OutputStream output = null;
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(sUrl[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                // expect HTTP 200 OK, so we don't mistakenly save error report
+                // instead of the file
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    return "Server returned HTTP " + connection.getResponseCode()
+                            + " " + connection.getResponseMessage();
+                }
+                // this will be useful to display download percentage
+                // might be -1: server did not report the length
+                int fileLength = connection.getContentLength();
+
+                // download the file
+                input = connection.getInputStream();
+                output = new FileOutputStream( context.getExternalFilesDir(null) + "/git.tar.gz");
+
+                byte data[] = new byte[4096];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    // allow canceling with back button
+                    if (isCancelled()) {
+                        input.close();
+                        return null;
+                    }
+                    total += count;
+                    // publishing the progress....
+                    if (fileLength > 0) // only if total length is known
+                        publishProgress((int) (total * 100 / fileLength));
+                    output.write(data, 0, count);
+                }
+            } catch (Exception e) {
+                return e.toString();
+            } finally {
+                try {
+                    if (output != null)
+                        output.close();
+                    if (input != null)
+                        input.close();
+                } catch (IOException ignored) {
+                }
+
+                if (connection != null)
+                    connection.disconnect();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            mWakeLock.release();
+            if(Method2.this.isVisible()){
+                mProgressDialog.dismiss();
+            }
+            if (result != null) {
+                Toast.makeText(context, "Download error: " + result, Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(context, "Download Completed !", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
     private class InitializeApps extends AsyncTask<Void, Void, Void> {
         final ViewGroup nullParent = null;
