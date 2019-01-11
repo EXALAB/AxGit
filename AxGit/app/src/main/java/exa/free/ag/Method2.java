@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,11 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +46,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import exa.free.interfaces.AppSelector;
 
@@ -61,6 +70,7 @@ public class Method2 extends Fragment implements AppSelector {
     TextView textView3;
     TextView textView5;
     ProgressDialog mProgressDialog;
+    ProgressDialog mProgressDialog2;
     InterstitialAd mInterstitialAd;
     String s;
     String s2;
@@ -88,6 +98,12 @@ public class Method2 extends Fragment implements AppSelector {
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(false);
 
+        mProgressDialog2 = new ProgressDialog(getActivity());
+        mProgressDialog2.setMessage("Extracting...");
+        mProgressDialog2.setIndeterminate(true);
+        mProgressDialog2.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog2.setCancelable(false);
+
         mInterstitialAd = new InterstitialAd(context);
         mInterstitialAd.setAdUnitId("ca-app-pub-5748356089815497/2595876004");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
@@ -105,22 +121,22 @@ public class Method2 extends Fragment implements AppSelector {
             button5.setEnabled(false);
         }else{
             if(s2.equals("arm64-v8a")){
-                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
                 textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data" + s);
             }else if (s2.contains("arm")){
-                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
                 textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("x86")){
-                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
                 textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("x86_64")){
-                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
                 textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("mips")){
-                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
                 textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }else if(s2.equals("mips64")){
-                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                 textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
             }
         }
@@ -160,22 +176,22 @@ public class Method2 extends Fragment implements AppSelector {
                     mInterstitialAd.show();
                 }else{
                     if(s2.equals("arm64-v8a")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if (s2.contains("arm")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("x86")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("x86_64")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("mips")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }else if(s2.equals("mips64")){
-                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+                        ClipData clip = ClipData.newPlainText("Command", "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
                         clipboard.setPrimaryClip(clip);
                     }
                 }
@@ -235,22 +251,22 @@ public class Method2 extends Fragment implements AppSelector {
         editor.apply();
         s = sharedPreferences.getString("ChoosenTerminal", "None");
         if(s2.equals("arm64-v8a")){
-            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
             textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data" + s);
         }else if (s2.contains("arm")){
-            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
             textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("x86")){
-            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
             textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("x86_64")){
-            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
             textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("mips")){
-            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && && chmod 755 *");
             textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }else if(s2.equals("mips64")){
-            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/git.tar.gz " + "/data/data/" + s + " && tar -xzvf git.tar.gz && rm git.tar.gz && chmod 755 *");
+            textView3.setText("Step 3 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s + " && mv " + context.getExternalFilesDir(null) + "/* " + "/data/data/" + s + " && chmod 755 *");
             textView5.setText("Step 5 : Copy the command to clipboard :\n\n" + "cd /data/data/" + s);
         }
         button3.setEnabled(true);
@@ -329,7 +345,7 @@ public class Method2 extends Fragment implements AppSelector {
 
                 // download the file
                 input = connection.getInputStream();
-                output = new FileOutputStream( context.getExternalFilesDir(null) + "/git.tar.gz");
+                output = new FileOutputStream( context.getExternalFilesDir(null) + "/git.zip");
 
                 byte data[] = new byte[4096];
                 long total = 0;
@@ -373,6 +389,82 @@ public class Method2 extends Fragment implements AppSelector {
                 Toast.makeText(context, "Download error: " + result, Toast.LENGTH_LONG).show();
             }else {
                 Toast.makeText(context, "Download Completed !", Toast.LENGTH_SHORT).show();
+                new Extract(context).execute();
+            }
+        }
+    }
+    private class Extract extends AsyncTask<Integer, Integer, Void> {
+
+        private Context context;
+        private PowerManager.WakeLock mWakeLock;
+        private int i = 0;
+
+        public Extract(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    getClass().getName());
+            mWakeLock.acquire();
+            mProgressDialog2.show();
+            try {
+                ZipFile zip = new ZipFile(context.getExternalFilesDir(null) + "/git.zip");
+                mProgressDialog2.setMax(zip.size());
+            }catch(Exception e){
+                Log.e("error", "Failed to read file");
+            }
+        }
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            super.onProgressUpdate(progress);
+            // if we get here, length is known, now set indeterminate to false
+            mProgressDialog2.setIndeterminate(false);
+            mProgressDialog2.setProgress(progress[0]);
+        }
+
+        @Override
+        protected Void doInBackground(Integer... param) {
+            // UNZIP YOUR FILE HERE
+            try {
+                ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(context.getExternalFilesDir(null) + "/git.zip")));
+                ZipEntry ze;
+                int count;
+                byte[] buffer = new byte[8192];
+                while ((ze = zis.getNextEntry()) != null) {
+                    File file = new File(context.getExternalFilesDir(null), ze.getName());
+                    File dir = ze.isDirectory() ? file : file.getParentFile();
+                    if (!dir.isDirectory() && !dir.mkdirs()) {
+                        throw new FileNotFoundException("Failed to ensure directory: " + dir.getAbsolutePath());
+                    }
+                    if (ze.isDirectory())
+                        continue;
+                    FileOutputStream fout = new FileOutputStream(file);
+                    try {
+                        while ((count = zis.read(buffer)) != -1) {
+                            i++;
+                            publishProgress(i);
+                            fout.write(buffer, 0, count);
+                        }
+                    } finally {
+                        fout.close();
+                    }
+                }
+                zis.close();
+                DeleteGit();
+            }catch (Exception e){
+                Log.e("Error", "Error while extracting.");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            mWakeLock.release();
+            if(Method2.this.isVisible()){
+                mProgressDialog2.dismiss();
             }
         }
     }
@@ -487,6 +579,12 @@ public class Method2 extends Fragment implements AppSelector {
             }
         }
         return false;
+    }
+    private void DeleteGit() {
+        File file = new File(context.getExternalFilesDir(null) + "/git.zip");
+        if(file.exists() && file.isFile()){
+            file.delete();
+        }
     }
     private boolean isPackageInstalled(String packagename, PackageManager packageManager) {
         try {
