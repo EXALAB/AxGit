@@ -105,7 +105,7 @@ public class Method2 extends Fragment implements AppSelector {
         mProgressDialog2.setCancelable(false);
 
         mInterstitialAd = new InterstitialAd(context);
-        mInterstitialAd.setAdUnitId("ca-app-pub-5748356089815497/2595876004");
+        mInterstitialAd.setAdUnitId("ca-app-pub-5748356089815497/1385797738");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
         if(Build.VERSION.SDK_INT >= 21){
